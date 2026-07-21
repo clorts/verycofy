@@ -1,0 +1,470 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat Local no Termux</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter','Segoe UI',Arial,sans-serif; }
+
+  body {
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: radial-gradient(circle at 20% 20%, #1f2a48 0%, #12172b 55%, #0b0e1c 100%);
+    overflow:hidden;
+  }
+
+  /* ---------- LOGIN ---------- */
+  #login-screen {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 48px 42px;
+    width: 340px;
+    text-align:center;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.45);
+    animation: popIn 0.6s cubic-bezier(.19,1,.22,1);
+  }
+
+  @keyframes popIn {
+    0% { transform: translateY(24px); opacity:0; }
+    100% { transform: translateY(0); opacity:1; }
+  }
+
+  #login-screen .icon {
+    width:56px; height:56px;
+    margin:0 auto 20px;
+    border-radius:16px;
+    background: linear-gradient(135deg,#4f6df5,#6f5bf7);
+    display:flex; align-items:center; justify-content:center;
+    font-size:26px;
+    box-shadow: 0 10px 24px rgba(79,109,245,0.35);
+  }
+
+  #login-screen h1 {
+    color:#f2f4fb;
+    font-size: 22px;
+    font-weight:600;
+    margin-bottom: 6px;
+  }
+
+  #login-screen p {
+    color: rgba(240,242,250,0.5);
+    font-size: 13px;
+    margin-bottom: 26px;
+  }
+
+  #name-input {
+    width:100%;
+    padding: 13px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    outline:none;
+    font-size:14px;
+    margin-bottom: 16px;
+    background: rgba(255,255,255,0.06);
+    color:#f2f4fb;
+    transition: 0.2s;
+  }
+  #name-input::placeholder { color: rgba(240,242,250,0.35); }
+  #name-input:focus {
+    border-color: #6f5bf7;
+    background: rgba(255,255,255,0.09);
+  }
+
+  #enter-btn {
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:12px;
+    font-size:14px;
+    font-weight:600;
+    letter-spacing:0.3px;
+    color:#fff;
+    background: linear-gradient(135deg, #4f6df5, #6f5bf7);
+    cursor:pointer;
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  }
+  #enter-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(79,109,245,0.35); }
+  #enter-btn:active { transform: translateY(0); }
+
+  .hidden { display:none !important; }
+  .fade-out { animation: fadeOut 0.4s forwards; }
+  @keyframes fadeOut { to { opacity:0; transform: scale(0.96); } }
+
+  /* ---------- CHAT ---------- */
+  #chat-screen {
+    width: 400px;
+    height: 620px;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.5);
+    animation: popIn 0.5s cubic-bezier(.19,1,.22,1);
+  }
+
+  #chat-header {
+    padding: 16px 20px;
+    background: rgba(255,255,255,0.02);
+    color:#f2f4fb;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  #chat-header .bot-avatar {
+    width:38px; height:38px;
+    border-radius:11px;
+    background: linear-gradient(135deg,#4f6df5,#6f5bf7);
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px;
+    flex-shrink:0;
+  }
+  #chat-header .info { display:flex; flex-direction:column; }
+  #chat-header h2 { font-size:15px; font-weight:600; }
+  #chat-header .status { font-size:11.5px; color: rgba(240,242,250,0.45); display:flex; align-items:center; gap:5px; }
+  #chat-header .dot {
+    width:7px; height:7px; border-radius:50%;
+    background:#3ddc84;
+    box-shadow: 0 0 0 0 rgba(61,220,132,0.6);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(61,220,132,0.55); }
+    70% { box-shadow: 0 0 0 6px rgba(61,220,132,0); }
+    100% { box-shadow: 0 0 0 0 rgba(61,220,132,0); }
+  }
+
+  #messages {
+    flex:1;
+    padding: 18px 16px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  #messages::-webkit-scrollbar { width:5px; }
+  #messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius:10px; }
+
+  .row { display:flex; gap:8px; align-items:flex-end; }
+  .row.me { flex-direction:row-reverse; }
+
+  .avatar {
+    width:26px; height:26px;
+    border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px;
+    font-weight:600;
+    flex-shrink:0;
+    color:#fff;
+    background: linear-gradient(135deg,#3ddc84,#2bb673);
+  }
+
+  .msg {
+    max-width: 72%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 13.5px;
+    line-height:1.45;
+    animation: msgIn 0.28s ease;
+    word-wrap: break-word;
+  }
+  @keyframes msgIn {
+    from { opacity:0; transform: translateY(8px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+
+  .row.me .msg {
+    background: linear-gradient(135deg, #4f6df5, #6f5bf7);
+    color:#fff;
+    border-bottom-right-radius: 4px;
+  }
+  .row:not(.me) .msg {
+    background: rgba(255,255,255,0.07);
+    color:#eef0f8;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-bottom-left-radius: 4px;
+  }
+  .msg .name {
+    display:block;
+    font-size: 10.5px;
+    opacity:0.65;
+    margin-bottom: 3px;
+    font-weight:600;
+  }
+
+  #input-area {
+    display:flex;
+    padding: 14px;
+    gap:10px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    background: rgba(255,255,255,0.015);
+  }
+  #msg-input {
+    flex:1;
+    padding: 11px 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    outline:none;
+    font-size:13.5px;
+    background: rgba(255,255,255,0.05);
+    color:#f2f4fb;
+  }
+  #msg-input::placeholder { color: rgba(240,242,250,0.35); }
+  #msg-input:focus { border-color:#6f5bf7; }
+
+  #send-btn {
+    padding: 11px 18px;
+    border:none;
+    border-radius:12px;
+    background: linear-gradient(135deg, #4f6df5, #6f5bf7);
+    color:#fff;
+    font-weight:600;
+    cursor:pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  #send-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(79,109,245,0.35); }
+</style>
+</head>
+<body>
+
+  <!-- Tela de Login enviando os dados para o backend registrar a conta -->
+  <form id="login-screen" action="/login" method="POST" onsubmit="saveUserLocally()">
+    <div class="icon">💬</div>
+    <h1>Entrar no chat</h1>
+    <p>Informe seu nome para continuar</p>
+    <input type="text" id="name-input" name="username" placeholder="Seu Nome:" maxlength="20" autocomplete="off" required>
+    <button type="submit" id="enter-btn">ENTRAR</button>
+  </form>
+
+  <div id="chat-screen" class="hidden">
+    <div id="chat-header">
+      <div class="bot-avatar">💬</div>
+      <div class="info">
+        <h2>Chat Local</h2>
+        <span class="status"><span class="dot"></span> online</span>
+      </div>
+    </div>
+    
+    <div id="messages">
+      
+        <div class="row" data-sender="Kaue">
+          <div class="avatar">K</div>
+          <div class="msg">
+            <span class="name">Kaue</span>
+            Oi
+          </div>
+        </div>
+      
+        <div class="row" data-sender="Ka">
+          <div class="avatar">K</div>
+          <div class="msg">
+            <span class="name">Ka</span>
+            Kauee
+          </div>
+        </div>
+      
+        <div class="row" data-sender="Scarlet">
+          <div class="avatar">S</div>
+          <div class="msg">
+            <span class="name">Scarlet</span>
+            Kkk
+          </div>
+        </div>
+      
+        <div class="row" data-sender="Scarlet">
+          <div class="avatar">S</div>
+          <div class="msg">
+            <span class="name">Scarlet</span>
+            Oi
+          </div>
+        </div>
+      
+        <div class="row" data-sender="Scarlet_MAX">
+          <div class="avatar">S</div>
+          <div class="msg">
+            <span class="name">Scarlet_MAX</span>
+            Oi
+          </div>
+        </div>
+      
+        <div class="row" data-sender="Scarlet_MAX">
+          <div class="avatar">S</div>
+          <div class="msg">
+            <span class="name">Scarlet_MAX</span>
+            Oi
+          </div>
+        </div>
+      
+        <div class="row" data-sender="Isaac">
+          <div class="avatar">I</div>
+          <div class="msg">
+            <span class="name">Isaac</span>
+            Oi cu
+          </div>
+        </div>
+      
+        <div class="row" data-sender="Isaac">
+          <div class="avatar">I</div>
+          <div class="msg">
+            <span class="name">Isaac</span>
+            Oi cu
+          </div>
+        </div>
+      
+        <div class="row" data-sender="Isaac">
+          <div class="avatar">I</div>
+          <div class="msg">
+            <span class="name">Isaac</span>
+            Oi cu
+          </div>
+        </div>
+      
+        <div class="row" data-sender="Isaac">
+          <div class="avatar">I</div>
+          <div class="msg">
+            <span class="name">Isaac</span>
+            Oi cu
+          </div>
+        </div>
+      
+        <div class="row" data-sender="du">
+          <div class="avatar">D</div>
+          <div class="msg">
+            <span class="name">du</span>
+            Oi
+          </div>
+        </div>
+      
+        <div class="row" data-sender="du">
+          <div class="avatar">D</div>
+          <div class="msg">
+            <span class="name">du</span>
+            Oi
+          </div>
+        </div>
+      
+        <div class="row" data-sender="du">
+          <div class="avatar">D</div>
+          <div class="msg">
+            <span class="name">du</span>
+            Oi isaaaaa
+          </div>
+        </div>
+      
+        <div class="row" data-sender="du">
+          <div class="avatar">D</div>
+          <div class="msg">
+            <span class="name">du</span>
+            Oi isaaaaa
+          </div>
+        </div>
+      
+        <div class="row" data-sender="du">
+          <div class="avatar">D</div>
+          <div class="msg">
+            <span class="name">du</span>
+            Oi isaaaaa
+          </div>
+        </div>
+      
+        <div class="row" data-sender="du">
+          <div class="avatar">D</div>
+          <div class="msg">
+            <span class="name">du</span>
+            Oi isaaaaa
+          </div>
+        </div>
+      
+        <div class="row" data-sender="du">
+          <div class="avatar">D</div>
+          <div class="msg">
+            <span class="name">du</span>
+            Oi isaaaaa
+          </div>
+        </div>
+      
+        <div class="row" data-sender="du">
+          <div class="avatar">D</div>
+          <div class="msg">
+            <span class="name">du</span>
+            Oi isaaaaa
+          </div>
+        </div>
+      
+        <div class="row" data-sender="du">
+          <div class="avatar">D</div>
+          <div class="msg">
+            <span class="name">du</span>
+            Oi isaaaaa
+          </div>
+        </div>
+      
+    </div>
+
+    <form action="/send" method="POST" id="input-area">
+      <input type="hidden" name="username" id="hidden-username">
+      <input type="text" id="msg-input" name="message" placeholder="Escreva uma mensagem..." required autocomplete="off">
+      <button type="submit" id="send-btn">➤</button>
+    </form>
+  </div>
+
+<script>
+  const loginScreen = document.getElementById('login-screen');
+  const chatScreen = document.getElementById('chat-screen');
+  const nameInput = document.getElementById('name-input');
+  const hiddenUsername = document.getElementById('hidden-username');
+  const msgBox = document.getElementById('messages');
+
+  let username = localStorage.getItem('termux_chat_user');
+
+  function startChat(name) {
+    username = name;
+    hiddenUsername.value = name;
+
+    // Alinha as mensagens do próprio usuário à direita
+    document.querySelectorAll('.row').forEach(row => {
+      if (row.getAttribute('data-sender') === username) {
+        row.classList.add('me');
+      }
+    });
+
+    loginScreen.classList.add('fade-out');
+    setTimeout(() => {
+      loginScreen.classList.add('hidden');
+      chatScreen.classList.remove('hidden');
+      msgBox.scrollTop = msgBox.scrollHeight;
+    }, 380);
+  }
+
+  function saveUserLocally() {
+    const name = nameInput.value.trim();
+    if (name) {
+      localStorage.setItem('termux_chat_user', name);
+    }
+  }
+
+  // Se já tiver o nome salvo no navegador, entra direto e preenche o input oculto
+  if (username) {
+    hiddenUsername.value = username;
+    startChat(username);
+  } else {
+    // Se não tiver, ao enviar o formulário de login, salvamos localmente também
+    loginScreen.addEventListener('submit', () => {
+      saveUserLocally();
+    });
+  }
+
+  // Mantém a rolagem na última mensagem
+  msgBox.scrollTop = msgBox.scrollHeight;
+</script>
+</body>
+</html>
