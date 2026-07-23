@@ -2,664 +2,217 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>cochicha.link — mensagens anônimas</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
-
-  :root{
-    --bg:#0f0f13;
-    --bg-soft:#131319;
-    --card:#1a1a24;
-    --card-hi:#20202c;
-    --accent:#8b5cf6;
-    --accent2:#3b82f6;
-    --text:#ffffff;
-    --text-secondary:#9ca3af;
-    --success:#22c55e;
-    --danger:#f87171;
-    --border:#26262f;
-  }
-
-  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body{ height:100%; }
-  body{
-    margin:0;
-    background:
-      radial-gradient(circle at 15% 0%, rgba(139,92,246,0.14), transparent 40%),
-      radial-gradient(circle at 100% 20%, rgba(59,130,246,0.10), transparent 45%),
-      var(--bg);
-    color:var(--text);
-    font-family:'Inter',system-ui,sans-serif;
-    min-height:100vh;
-    -webkit-font-smoothing:antialiased;
-  }
-  @media (prefers-reduced-motion: reduce){
-    *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
-  }
-
-  #app{
-    max-width:460px;
-    margin:0 auto;
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    padding:28px 20px 40px;
-    position:relative;
-  }
-
-  .fade-in{ animation:fadeIn .35s ease both; }
-  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
-
-  .brand{
-    display:flex; align-items:center; gap:8px;
-    font-family:'Poppins',sans-serif; font-weight:800; font-size:20px;
-    letter-spacing:-.02em; margin-bottom:6px;
-  }
-  .brand-dot{
-    width:10px; height:10px; border-radius:50%;
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    box-shadow:0 0 12px rgba(139,92,246,.8);
-  }
-  .brand-mark{ color:var(--accent); }
-
-  .card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:16px;
-    box-shadow:0 10px 30px rgba(0,0,0,.35);
-  }
-
-  h1{ font-family:'Poppins',sans-serif; font-weight:700; font-size:26px; line-height:1.25; margin:18px 0 8px; }
-  .sub{ color:var(--text-secondary); font-size:14.5px; line-height:1.5; margin-bottom:26px; }
-
-  .field{
-    display:flex; align-items:center;
-    background:var(--bg-soft); border:1px solid var(--border);
-    border-radius:16px; padding:4px 4px 4px 16px;
-    transition:border-color .2s, box-shadow .2s;
-  }
-  .field:focus-within{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(139,92,246,.18); }
-  .field .prefix{ color:var(--text-secondary); font-size:14px; white-space:nowrap; }
-  .field input{
-    flex:1; min-width:0; background:transparent; border:none; outline:none;
-    color:var(--text); font-size:15.5px; padding:14px 8px; font-family:'Inter',sans-serif;
-  }
-  .field input::placeholder{ color:#5c5c6b; }
-
-  .btn{
-    appearance:none; border:none; cursor:pointer;
-    font-family:'Inter',sans-serif; font-weight:600; font-size:15px;
-    border-radius:999px; padding:14px 22px;
-    transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;
-  }
-  .btn:active{ transform:scale(.98); }
-  .btn-primary{
-    width:100%;
-    background:linear-gradient(135deg,var(--accent2),var(--accent));
-    color:#fff;
-    box-shadow:0 6px 20px rgba(139,92,246,.35);
-  }
-  .btn-primary:hover{ transform:scale(1.02); box-shadow:0 8px 28px rgba(139,92,246,.55); }
-  .btn-primary:disabled{ opacity:.45; cursor:not-allowed; transform:none; box-shadow:none; }
-  .btn-ghost{
-    background:var(--card-hi); color:var(--text); border:1px solid var(--border);
-  }
-  .btn-ghost:hover{ border-color:#3a3a48; }
-  .btn-danger-ghost{
-    background:transparent; color:var(--text-secondary); border:1px solid var(--border);
-  }
-  .btn-danger-ghost:hover{ color:var(--danger); border-color:rgba(248,113,113,.4); }
-  .btn-row{ display:flex; gap:10px; margin-top:10px; }
-  .btn-row .btn{ flex:1; font-size:13.5px; padding:12px 14px; }
-
-  .error-text{ color:var(--danger); font-size:13px; margin-top:8px; min-height:16px; }
-
-  .spinner{
-    width:34px; height:34px; border-radius:50%;
-    border:3px solid rgba(139,92,246,.2);
-    border-top-color:var(--accent);
-    animation:spin .8s linear infinite;
-    margin:40px auto;
-  }
-  @keyframes spin{ to{ transform:rotate(360deg); } }
-
-  /* Profile / send page */
-  .avatar{
-    width:64px; height:64px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Poppins',sans-serif; font-weight:700; font-size:24px; color:#fff;
-    background:linear-gradient(135deg,var(--accent2),var(--accent));
-    box-shadow:0 0 24px rgba(139,92,246,.4);
-    margin-bottom:14px;
-  }
-  .handle{ color:var(--text-secondary); font-size:14px; margin-bottom:4px; }
-
-  .composer{ padding:18px; margin-top:18px; }
-  .composer textarea{
-    width:100%; min-height:110px; resize:vertical;
-    background:transparent; border:none; outline:none;
-    color:var(--text); font-family:'Inter',sans-serif; font-size:15.5px; line-height:1.5;
-  }
-  .composer textarea::placeholder{ color:#5c5c6b; }
-  .composer-footer{ display:flex; justify-content:flex-end; margin-top:6px; }
-  .composer-footer .btn-primary{ width:auto; padding:12px 24px; }
-
-  .composer.leaving{ animation:slideUp .35s ease forwards; }
-  @keyframes slideUp{ to{ opacity:0; transform:translateY(-18px) scale(.98); } }
-
-  .success-box{
-    display:flex; flex-direction:column; align-items:center; text-align:center;
-    padding:44px 20px; animation:fadeIn .4s ease both;
-  }
-  .check{
-    width:64px; height:64px; border-radius:50%;
-    background:rgba(34,197,94,.12); display:flex; align-items:center; justify-content:center;
-    margin-bottom:16px; animation:popIn .45s cubic-bezier(.34,1.56,.64,1) both;
-  }
-  @keyframes popIn{ from{ transform:scale(0); opacity:0; } to{ transform:scale(1); opacity:1; } }
-  .check svg{ width:30px; height:30px; }
-  .check path{
-    stroke:var(--success); stroke-width:3; fill:none;
-    stroke-dasharray:40; stroke-dashoffset:40;
-    animation:draw .4s ease .15s forwards;
-  }
-  @keyframes draw{ to{ stroke-dashoffset:0; } }
-
-  .footer-link{ text-align:center; margin-top:auto; padding-top:30px; }
-  .footer-link a{ color:var(--accent); text-decoration:none; font-size:13.5px; font-weight:600; }
-
-  /* Inbox */
-  .inbox-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
-  .inbox-count{ color:var(--text-secondary); font-size:13.5px; }
-
-  .msg-card{
-    padding:16px; margin-top:12px; position:relative; overflow:hidden;
-    animation:cardIn .35s ease both;
-  }
-  @keyframes cardIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
-  .msg-card::before{
-    content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
-    background:linear-gradient(180deg,var(--accent),var(--accent2));
-  }
-  .msg-text{ font-size:15px; line-height:1.55; white-space:pre-wrap; word-break:break-word; }
-  .msg-meta{ color:var(--text-secondary); font-size:12px; margin-top:10px; }
-
-  .empty-state{ text-align:center; padding:50px 16px; }
-  .empty-state .emoji{ font-size:38px; margin-bottom:10px; }
-  .empty-state p{ color:var(--text-secondary); font-size:14.5px; line-height:1.6; margin-bottom:20px; }
-
-  .toast{
-    position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px);
-    background:var(--card-hi); border:1px solid var(--border); color:var(--text);
-    padding:12px 18px; border-radius:14px; font-size:13.5px; font-weight:500;
-    box-shadow:0 10px 30px rgba(0,0,0,.4); opacity:0; pointer-events:none;
-    transition:opacity .25s ease, transform .25s ease; z-index:50;
-  }
-  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Script Lua — Aprenda do zero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5792875554604212"
+     crossorigin="anonymous"></script>
 </head>
 <body>
-<div id="app"><div class="spinner"></div></div>
-<div class="toast" id="toast"></div>
 
-<script>
-(function(){
-  const app = document.getElementById('app');
-  const toastEl = document.getElementById('toast');
-  let toastTimer;
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-moon" aria-hidden="true"></span>
+    <span class="brand-text">script<em>lua</em></span>
+  </div>
+  <nav class="topbar-nav">
+    <a href="#oque">O que é</a>
+    <a href="#aulas">Aulas</a>
+  </nav>
+</header>
 
-  function showToast(msg){
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(()=> toastEl.classList.remove('show'), 2200);
-  }
+<main>
 
-  function escapeHtml(str){
-    return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-moon" aria-hidden="true">
+      <span class="crater c1"></span>
+      <span class="crater c2"></span>
+      <span class="crater c3"></span>
+      <span class="crater c4"></span>
+    </div>
+    <p class="eyebrow">script · lua · noite de código</p>
+    <h1>Cada script começa<br>numa <em>lua nova</em>.</h1>
+    <p class="hero-sub">Um lugar simples pra entender o que é Script Lua e evoluir aula por aula — do escuro até a lua cheia.</p>
+    <a class="hero-cta" href="#oque">Começar agora ↓</a>
+  </section>
 
-  function normalizeUsername(raw){
-    return (raw||'').trim().toLowerCase().replace(/\s+/g,'');
-  }
-  function validUsername(u){
-    return /^[a-z0-9_.]{3,20}$/.test(u);
-  }
-  function initials(u){ return (u[0]||'?').toUpperCase(); }
+  <!-- O QUE É -->
+  <section id="oque" class="section explain">
+    <p class="section-eyebrow">a categoria</p>
+    <h2>Script Lua — o que é?</h2>
 
-  function timeAgo(ts){
-    const s = Math.floor((Date.now()-ts)/1000);
-    if(s < 60) return 'agora mesmo';
-    const m = Math.floor(s/60); if(m < 60) return m+' min atrás';
-    const h = Math.floor(m/60); if(h < 24) return h+'h atrás';
-    const d = Math.floor(h/24); return d+'d atrás';
-  }
-
-  function profileUrl(u){
-    return location.origin + location.pathname + '#/u/' + u;
-  }
-
-  // ---------- storage helpers ----------
-  async function getProfile(username){
-    try{
-      const r = await window.storage.get('profile:'+username, true);
-      return r ? JSON.parse(r.value) : null;
-    }catch(e){ return null; }
-  }
-  async function createProfile(username){
-    const data = { username, createdAt: Date.now() };
-    await window.storage.set('profile:'+username, JSON.stringify(data), true);
-    return data;
-  }
-  async function getMessages(username){
-    try{
-      const r = await window.storage.get('messages:'+username, true);
-      return r ? JSON.parse(r.value) : [];
-    }catch(e){ return []; }
-  }
-  async function saveMessages(username, list){
-    await window.storage.set('messages:'+username, JSON.stringify(list), true);
-  }
-  async function getMyUsername(){
-    try{
-      const r = await window.storage.get('my-username', false);
-      return r ? r.value : null;
-    }catch(e){ return null; }
-  }
-  async function setMyUsername(u){
-    try{ await window.storage.set('my-username', u, false); }catch(e){}
-  }
-
-  // ---------- routing ----------
-  window.addEventListener('hashchange', render);
-  window.addEventListener('DOMContentLoaded', render);
-  render();
-
-  function route(){
-    const h = location.hash.replace(/^#/,'') || '/';
-    if(h === '/' ) return { name:'home' };
-    if(h === '/inbox') return { name:'inbox' };
-    const m = h.match(/^\/u\/(.+)$/);
-    if(m) return { name:'profile', username: decodeURIComponent(m[1]) };
-    return { name:'home' };
-  }
-
-  let inboxPollInterval = null;
-  let inboxSnapshot = null;
-  function stopInboxPolling(){
-    if(inboxPollInterval){ clearInterval(inboxPollInterval); inboxPollInterval = null; }
-  }
-
-  async function render(){
-    stopInboxPolling();
-    const r = route();
-    app.innerHTML = '<div class="spinner"></div>';
-    if(r.name === 'home') return renderHome();
-    if(r.name === 'inbox') return renderInbox();
-    if(r.name === 'profile') return renderProfile(r.username);
-  }
-
-  // ---------- HOME ----------
-  function renderHome(){
-    app.innerHTML = `
-      <div class="fade-in">
-        <div class="brand"><span class="brand-dot"></span>cochicha<span class="brand-mark">.link</span></div>
-        <h1>Receba mensagens<br>anônimas de verdade.</h1>
-        <div class="sub">Crie seu link, cole no Instagram ou WhatsApp e comece a receber perguntas e confissões sem saber quem mandou.</div>
-
-        <div class="field">
-          <span class="prefix">cochicha.link/u/</span>
-          <input id="username-input" type="text" placeholder="seunome" maxlength="20" autocomplete="off">
-        </div>
-        <div class="error-text" id="home-error"></div>
-        <button class="btn btn-primary" id="create-btn" style="margin-top:10px;">Criar meu link agora →</button>
-
-        <div class="footer-link">
-          <a href="#/inbox">Já tenho um link, ver minhas mensagens</a>
-        </div>
+    <div class="explain-grid">
+      <div class="explain-card main">
+        <h3>Explicação</h3>
+        <p>
+          Lua é uma linguagem de programação leve, rápida e feita para ser <strong>encaixada dentro de outros programas</strong> — jogos, apps, emuladores e engines.
+          Em vez de rodar sozinha como um app comum, um <strong>script Lua</strong> é um pedacinho de código que diz a esse programa "faça isso agora", tipo abrir um menu, mudar um valor ou automatizar uma ação.
+        </p>
+        <p>
+          É por isso que Lua aparece tanto em jogos, mods e ferramentas mobile: ela é pequena, fácil de aprender e não precisa de instalação pesada pra funcionar.
+        </p>
       </div>
-    `;
-    const input = document.getElementById('username-input');
-    const btn = document.getElementById('create-btn');
-    const err = document.getElementById('home-error');
 
-    input.addEventListener('input', ()=>{ err.textContent=''; });
-    input.addEventListener('keydown', e=>{ if(e.key==='Enter') btn.click(); });
-
-    btn.addEventListener('click', async ()=>{
-      const u = normalizeUsername(input.value);
-      if(!validUsername(u)){
-        err.textContent = 'Use de 3 a 20 letras, números, "." ou "_".';
-        return;
-      }
-      btn.disabled = true;
-      btn.textContent = 'Criando...';
-      const existing = await getProfile(u);
-      if(existing){
-        const mine = await getMyUsername();
-        if(mine !== u){
-          err.textContent = 'Esse nome de usuário já está em uso. Tente outro.';
-          btn.disabled = false;
-          btn.textContent = 'Criar meu link agora →';
-          return;
-        }
-      } else {
-        await createProfile(u);
-      }
-      await setMyUsername(u);
-      location.hash = '#/inbox';
-    });
-
-    setTimeout(()=> input.focus(), 50);
-  }
-
-  // ---------- PROFILE (public send page) ----------
-  async function renderProfile(usernameRaw){
-    const username = normalizeUsername(usernameRaw);
-    const profile = await getProfile(username);
-
-    if(!profile){
-      app.innerHTML = `
-        <div class="fade-in" style="text-align:center; padding-top:60px;">
-          <div class="avatar" style="margin:0 auto 16px;">?</div>
-          <h1 style="font-size:20px;">Esse link não existe</h1>
-          <div class="sub">Verifique o nome de usuário ou crie o seu próprio link.</div>
-          <a href="#/" class="btn btn-primary" style="display:block; text-decoration:none; box-sizing:border-box;">Criar meu link</a>
-        </div>
-      `;
-      return;
-    }
-
-    app.innerHTML = `
-      <div class="fade-in" style="padding-top:10px;">
-        <div class="avatar">${initials(username)}</div>
-        <div class="handle">@${username}</div>
-        <h1 style="font-size:21px;">Mande algo anônimo 🤫</h1>
-        <div class="sub">Sua identidade nunca é revelada. Fique à vontade.</div>
-
-        <div class="card composer" id="composer">
-          <textarea id="msg-input" placeholder="Mande uma pergunta ou confissão anônima..." maxlength="500"></textarea>
-          <div class="composer-footer">
-            <button class="btn btn-primary" id="send-btn" disabled>Enviar</button>
-          </div>
-        </div>
-
-        <div class="footer-link"><a href="#/">Criar o meu também →</a></div>
+      <div class="explain-card">
+        <span class="tag">Leve</span>
+        <p>Roda em qualquer lugar, até no celular, sem travar nada.</p>
       </div>
-    `;
-
-    const textarea = document.getElementById('msg-input');
-    const sendBtn = document.getElementById('send-btn');
-    const composer = document.getElementById('composer');
-
-    textarea.addEventListener('input', ()=>{
-      sendBtn.disabled = textarea.value.trim().length === 0;
-    });
-
-    sendBtn.addEventListener('click', async ()=>{
-      const text = textarea.value.trim();
-      if(!text) return;
-      sendBtn.disabled = true;
-      sendBtn.textContent = 'Enviando...';
-      const list = await getMessages(username);
-      list.unshift({ id: Date.now()+'-'+Math.random().toString(36).slice(2,7), text, ts: Date.now() });
-      await saveMessages(username, list);
-
-      composer.classList.add('leaving');
-      setTimeout(()=>{
-        app.querySelector('h1').outerHTML = '';
-        composer.outerHTML = `
-          <div class="card success-box">
-            <div class="check">
-              <svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6"/></svg>
-            </div>
-            <div style="font-weight:600; font-size:15.5px;">Mensagem enviada com sucesso!</div>
-            <div class="sub" style="margin:6px 0 0;">Ninguém saberá que foi você 🤍</div>
-          </div>
-        `;
-        setTimeout(()=> renderProfile(username), 1600);
-      }, 350);
-    });
-
-    setTimeout(()=> textarea.focus(), 50);
-  }
-
-  // ---------- INBOX ----------
-  async function renderInbox(){
-    const mine = await getMyUsername();
-    if(!mine){
-      app.innerHTML = `
-        <div class="fade-in" style="text-align:center; padding-top:60px;">
-          <h1 style="font-size:20px;">Você ainda não tem um link</h1>
-          <div class="sub">Crie seu nome de usuário para começar a receber mensagens anônimas.</div>
-          <a href="#/" class="btn btn-primary" style="display:block; text-decoration:none; box-sizing:border-box;">Criar meu link</a>
-        </div>
-      `;
-      return;
-    }
-
-    const [messages] = await Promise.all([ getMessages(mine) ]);
-    const link = profileUrl(mine);
-
-    app.innerHTML = `
-      <div class="fade-in">
-        <div class="brand"><span class="brand-dot"></span>cochicha<span class="brand-mark">.link</span></div>
-        <div class="inbox-header" style="margin-top:14px;">
-          <h1 style="font-size:21px; margin:0;">Suas mensagens</h1>
-        </div>
-        <div class="inbox-count">@${mine} · ${messages.length} mensagem${messages.length===1?'':'s'}</div>
-
-        <div class="btn-row">
-          <button class="btn btn-ghost" id="copy-link-btn">🔗 Copiar link</button>
-          <button class="btn btn-ghost" id="wa-btn">💬 WhatsApp</button>
-        </div>
-
-        <div id="msg-list"></div>
+      <div class="explain-card">
+        <span class="tag">Simples</span>
+        <p>Sintaxe curta. Poucas regras. Fácil de ler mesmo no início.</p>
       </div>
-    `;
-
-    document.getElementById('copy-link-btn').addEventListener('click', async ()=>{
-      try{
-        await navigator.clipboard.writeText(link);
-        showToast('Link copiado!');
-      }catch(e){ showToast('Não foi possível copiar.'); }
-    });
-    document.getElementById('wa-btn').addEventListener('click', ()=>{
-      const text = encodeURIComponent('Me manda algo anônimo aqui 🤫 ' + link);
-      window.open('https://wa.me/?text='+text, '_blank');
-    });
-
-    const listEl = document.getElementById('msg-list');
-
-    inboxSnapshot = JSON.stringify(messages.map(m => m.id));
-    stopInboxPolling();
-    inboxPollInterval = setInterval(async ()=>{
-      if(document.visibilityState !== 'visible') return;
-      if(location.hash.replace(/^#/,'') !== '/inbox') { stopInboxPolling(); return; }
-      const fresh = await getMessages(mine);
-      const freshSnap = JSON.stringify(fresh.map(m => m.id));
-      if(freshSnap !== inboxSnapshot){
-        const hasNew = fresh.length > messages.length;
-        inboxSnapshot = freshSnap;
-        if(hasNew) showToast('📩 Nova mensagem recebida!');
-        renderInbox();
-      }
-    }, 4000);
-
-    if(messages.length === 0){
-      listEl.innerHTML = `
-        <div class="empty-state">
-          <div class="emoji">📭</div>
-          <p>Nenhuma mensagem ainda.<br>Compartilhe seu link para começar a receber confissões anônimas!</p>
-        </div>
-      `;
-      return;
-    }
-
-    listEl.innerHTML = messages.map(m => `
-      <div class="card msg-card" data-id="${m.id}" style="padding-left:19px;">
-        <div class="msg-text">${escapeHtml(m.text)}</div>
-        <div class="msg-meta">${timeAgo(m.ts)}</div>
-        <div class="btn-row">
-          <button class="btn btn-danger-ghost delete-btn" data-id="${m.id}">Apagar</button>
-          <button class="btn btn-ghost share-btn" data-id="${m.id}">📸 Compartilhar no story</button>
-        </div>
+      <div class="explain-card">
+        <span class="tag">Encaixável</span>
+        <p>Vive dentro de outro programa — não é um app sozinho.</p>
       </div>
-    `).join('');
+    </div>
+  </section>
 
-    listEl.querySelectorAll('.delete-btn').forEach(btn=>{
-      btn.addEventListener('click', async ()=>{
-        const id = btn.dataset.id;
-        const card = listEl.querySelector(`.msg-card[data-id="${id}"]`);
-        card.style.transition = 'opacity .25s ease, transform .25s ease';
-        card.style.opacity = '0';
-        card.style.transform = 'translateX(-12px)';
-        setTimeout(async ()=>{
-          const updated = messages.filter(m => m.id !== id);
-          await saveMessages(mine, updated);
-          renderInbox();
-        }, 220);
-      });
-    });
+  <!-- AULAS -->
+  <section id="aulas" class="section aulas">
+    <p class="section-eyebrow">a trilha</p>
+    <h2>Aulas de Script Lua</h2>
+    <p class="aulas-sub">Seis fases, como as fases da lua. Toque numa aula pra abrir.</p>
 
-    listEl.querySelectorAll('.share-btn').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const id = btn.dataset.id;
-        const m = messages.find(x => x.id === id);
-        if(m) generateShareImage(m.text, mine);
-      });
-    });
-  }
+    <div class="lesson-list">
 
-  // ---------- share image generator ----------
-  function isIOS(){
-    return /iP(hone|od|ad)/.test(navigator.userAgent) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  }
+      <button class="lesson" data-lesson="1">
+        <span class="phase phase-1" aria-hidden="true"></span>
+        <span class="lesson-info">
+          <span class="lesson-num">Aula 1 · Lua Nova</span>
+          <span class="lesson-title">Primeiros passos</span>
+        </span>
+        <span class="chevron">›</span>
+      </button>
+      <div class="lesson-body" id="body-1">
+        <p>Conteúdo desta aula ainda não foi escrito. Espaço reservado pra você preencher: o que é um script, onde ele roda, e como escrever a primeira linha.</p>
+      </div>
 
-  function generateShareImage(text, username){
-    const W = 1080, H = 1920;
-    const canvas = document.createElement('canvas');
-    canvas.width = W; canvas.height = H;
-    const ctx = canvas.getContext('2d');
+      <button class="lesson" data-lesson="2">
+        <span class="phase phase-2" aria-hidden="true"></span>
+        <span class="lesson-info">
+          <span class="lesson-num">Aula 2 · Crescente</span>
+          <span class="lesson-title">Variáveis e tipos</span>
+        </span>
+        <span class="chevron">›</span>
+      </button>
+      <div class="lesson-body" id="body-2">
+        <p>Conteúdo desta aula ainda não foi escrito. Espaço reservado pra você preencher: variáveis, números, texto e booleanos.</p>
+      </div>
 
-    // background
-    const grad = ctx.createRadialGradient(W*0.15,0,0,W*0.15,0,W*1.2);
-    grad.addColorStop(0,'rgba(139,92,246,0.22)');
-    grad.addColorStop(1,'#0f0f13');
-    ctx.fillStyle = '#0f0f13';
-    ctx.fillRect(0,0,W,H);
-    ctx.fillStyle = grad;
-    ctx.fillRect(0,0,W,H);
+      <button class="lesson" data-lesson="3">
+        <span class="phase phase-3" aria-hidden="true"></span>
+        <span class="lesson-info">
+          <span class="lesson-num">Aula 3 · Quarto Crescente</span>
+          <span class="lesson-title">Condições (if / else)</span>
+        </span>
+        <span class="chevron">›</span>
+      </button>
+      <div class="lesson-body" id="body-3">
+        <p>Conteúdo desta aula ainda não foi escrito. Espaço reservado pra você preencher: tomar decisões dentro do script.</p>
+      </div>
 
-    // card
-    const cardX = 80, cardY = H/2 - 380, cardW = W-160, cardH = 760, radius = 40;
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,.5)';
-    ctx.shadowBlur = 60;
-    roundRect(ctx, cardX, cardY, cardW, cardH, radius);
-    ctx.fillStyle = '#1a1a24';
-    ctx.fill();
-    ctx.restore();
+      <button class="lesson" data-lesson="4">
+        <span class="phase phase-4" aria-hidden="true"></span>
+        <span class="lesson-info">
+          <span class="lesson-num">Aula 4 · Lua Cheia</span>
+          <span class="lesson-title">Laços (for / while)</span>
+        </span>
+        <span class="chevron">›</span>
+      </button>
+      <div class="lesson-body" id="body-4">
+        <p>Conteúdo desta aula ainda não foi escrito. Espaço reservado pra você preencher: repetir ações automaticamente.</p>
+      </div>
 
-    // accent bar
-    const barGrad = ctx.createLinearGradient(0,cardY,0,cardY+cardH);
-    barGrad.addColorStop(0,'#8b5cf6'); barGrad.addColorStop(1,'#3b82f6');
-    ctx.fillStyle = barGrad;
-    roundRect(ctx, cardX, cardY, 10, cardH, 5);
-    ctx.fill();
+      <button class="lesson" data-lesson="5">
+        <span class="phase phase-5" aria-hidden="true"></span>
+        <span class="lesson-info">
+          <span class="lesson-num">Aula 5 · Minguante</span>
+          <span class="lesson-title">Funções</span>
+        </span>
+        <span class="chevron">›</span>
+      </button>
+      <div class="lesson-body" id="body-5">
+        <p>Conteúdo desta aula ainda não foi escrito. Espaço reservado pra você preencher: organizar código em blocos reutilizáveis.</p>
+      </div>
 
-    // label
-    ctx.fillStyle = '#9ca3af';
-    ctx.font = '600 30px Inter, sans-serif';
-    ctx.fillText('MENSAGEM ANÔNIMA', cardX+60, cardY+90);
+      <button class="lesson" data-lesson="6">
+        <span class="phase phase-6" aria-hidden="true"></span>
+        <span class="lesson-info">
+          <span class="lesson-num">Aula 6 · Lua Nova de novo</span>
+          <span class="lesson-title">Tabelas e projeto final</span>
+        </span>
+        <span class="chevron">›</span>
+      </button>
+      <div class="lesson-body" id="body-6">
+        <p>Conteúdo desta aula ainda não foi escrito. Espaço reservado pra você preencher: tabelas, e um mini script juntando tudo.</p>
+      </div>
 
-    // message text, wrapped
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '600 46px Inter, sans-serif';
-    wrapText(ctx, text, cardX+60, cardY+170, cardW-120, 62, 8);
+    </div>
+  </section>
 
-    // brand footer
-    ctx.fillStyle = '#8b5cf6';
-    ctx.font = '800 34px Poppins, sans-serif';
-    ctx.fillText('cochicha.link/u/'+username, cardX+60, cardY+cardH-50);
+  <footer class="site-footer">
+    <p>script<em>lua</em> — feito pra aprender no seu ritmo.</p>
+  </footer>
 
-    if(isIOS()){
-      // Safari/iOS ignores the download attribute and toBlob object URLs often
-      // fail to save from a new tab, so open a page with the data URL image
-      // the person can long-press and save directly to Fotos.
-      const dataUrl = canvas.toDataURL('image/png');
-      const win = window.open();
-      if(win){
-        win.document.write(`
-          <!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
-          <title>Sua imagem — cochicha.link</title>
-          <meta name="viewport" content="width=device-width, initial-scale=1">
-          <style>
-            body{ margin:0; min-height:100vh; background:#0f0f13; display:flex; flex-direction:column;
-              align-items:center; justify-content:center; padding:24px; box-sizing:border-box;
-              font-family:-apple-system,system-ui,sans-serif; }
-            img{ max-width:100%; border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,.6); }
-            p{ color:#9ca3af; font-size:15px; margin-top:18px; text-align:center; line-height:1.5; }
-            strong{ color:#fff; }
-          </style></head>
-          <body>
-            <img src="${dataUrl}" alt="Mensagem anônima - cochicha.link">
-            <p><strong>Toque e segure a imagem</strong><br>e escolha "Salvar na galeria" ou "Adicionar a Fotos" 📲</p>
-          </body></html>
-        `);
-        win.document.close();
-      } else {
-        showToast('Permita pop-ups para salvar a imagem.');
-      }
-      return;
-    }
+</main>
 
-    canvas.toBlob(blob=>{
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'cochicha-'+Date.now()+'.png';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(()=> URL.revokeObjectURL(url), 3000);
-      showToast('Imagem baixada!');
-    }, 'image/png');
-  }
+<!-- MODAL DE ANÚNCIO (aparece antes de abrir uma aula) -->
+<div class="ad-overlay" id="adOverlay" aria-hidden="true">
+  <div class="ad-modal" role="dialog" aria-label="Anúncio">
+    <div class="ad-modal-head">
+      <span class="ad-tag">publicidade</span>
+      <button class="ad-skip" id="adSkip" disabled>Pular anúncio (<span id="adCountdown">5</span>)</button>
+    </div>
+    <!--
+      ESPAÇO DO ANÚNCIO
+      Troque este bloco pelo código do seu provedor de anúncios (ex.: Google AdSense).
+      Exemplo com AdSense (depois de ter conta aprovada):
 
-  function roundRect(ctx,x,y,w,h,r){
-    ctx.beginPath();
-    ctx.moveTo(x+r,y);
-    ctx.arcTo(x+w,y,x+w,y+h,r);
-    ctx.arcTo(x+w,y+h,x,y+h,r);
-    ctx.arcTo(x,y+h,x,y,r);
-    ctx.arcTo(x,y,x+w,y,r);
-    ctx.closePath();
-  }
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"></script>
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="XXXXXXXXXX"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    -->
+    <div class="ad-placeholder">
+      <span class="ad-placeholder-moon" aria-hidden="true"></span>
+      <p>Espaço reservado pro anúncio</p>
+    </div>
+  </div>
+</div>
 
-  function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines){
-    const words = text.split(/\s+/);
-    let line = '', cy = y, lines = 0;
-    for(let i=0;i<words.length;i++){
-      const test = line + words[i] + ' ';
-      if(ctx.measureText(test).width > maxWidth && line !== ''){
-        ctx.fillText(line, x, cy);
-        line = words[i] + ' ';
-        cy += lineHeight;
-        lines++;
-        if(lines >= maxLines-1){
-          ctx.fillText(line.trim().slice(0,40)+'…', x, cy);
-          return;
-        }
-      } else {
-        line = test;
-      }
-    }
-    ctx.fillText(line, x, cy);
-  }
-})();
-</script>
+<!-- BOTÃO FLUTUANTE (3 pontinhos) -->
+<button class="fab" id="fabBtn" aria-label="Abrir assistente" aria-expanded="false">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- PAINEL DO ASSISTENTE -->
+<div class="assistant" id="assistant" aria-hidden="true">
+  <div class="assistant-head">
+    <span class="assistant-moon" aria-hidden="true"></span>
+    <div>
+      <strong>Assistente Lua</strong>
+      <small>tira dúvidas rápidas de script</small>
+    </div>
+    <button class="assistant-close" id="assistantClose" aria-label="Fechar assistente">×</button>
+  </div>
+  <div class="assistant-messages" id="assistantMessages">
+    <div class="msg bot">Oi! Pergunta algo sobre Lua — tipo "o que é variável" ou "como faço um loop".</div>
+  </div>
+  <form class="assistant-input" id="assistantForm">
+    <input type="text" id="assistantInput" placeholder="Escreve sua dúvida..." autocomplete="off">
+    <button type="submit" aria-label="Enviar">➤</button>
+  </form>
+</div>
+<div class="assistant-overlay" id="assistantOverlay"></div>
+
+<script src="script.js"></script>
 </body>
 </html>
